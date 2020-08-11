@@ -42,6 +42,11 @@ namespace Project_01
         /// <param name="itemsCount">number of countries to be printed</param>
         public void PrintTopStandardRates(bool ascending, int itemsCount)
         {
+            if (itemsCount < 1 || itemsCount > CountriesList.Count)
+            {
+                throw new ArgumentException("Invalid number of top countries.", nameof(itemsCount));
+            }
+            
             Console.WriteLine($"\nTop {itemsCount} countries with {(ascending ? "min" : "max")}. standard VAT:");
 
             if (ascending)
@@ -111,7 +116,7 @@ namespace Project_01
 
                 // try to create a new country and add to the list
                 Country newCountry = new Country(countryCode, ((JProperty)countryJsonBlock.First).Value.ToString());
-                if (newCountry.IsValid)
+                if (newCountry.IsValid())
                 {
                     this.CountriesList.Add(newCountry);
                 }
