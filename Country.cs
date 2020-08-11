@@ -8,47 +8,35 @@ namespace Project_01
     /// <summary>
     /// One imported country and its VAT
     /// </summary>
-    class Country
+    public class Country
     {
         /// <summary>
-        /// Country's name
+        /// Initializes a new instance of the <see cref="Country" /> class
+        /// </summary>
+        /// <param name="countryCode">countryCode (e.g. "UK")</param>
+        /// <param name="jsonString">json data of this country</param>
+        public Country(string countryCode, string jsonString)
+        {
+            this.TryImport(countryCode, jsonString);
+        }
+
+        /// <summary>
+        /// Gets or sets country's name
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Country's standard VAT rate
+        /// Gets or sets country's standard VAT rate
         /// </summary>
         public double StandardRate { get; set; }
 
         /// <summary>
-        /// Struct template for Json deserializer
+        /// Get whether the imported data are valid
         /// </summary>
-        private struct JsonTemplate
-        {
-            [JsonProperty("country")]
-            public string Country { get; set; }
-
-            [JsonProperty("standard_rate")]
-            public string StandardRate { get; set; }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="countryCode">countryCode (ie. "UK")</param>
-        /// <param name="jsonString">json data of this country</param>
-        public Country(string countryCode, string jsonString)
-        {
-            TryImport(countryCode, jsonString);
-        }
-
-        /// <summary>
-        /// Deconstructor
-        /// </summary>
-        /// <returns>true == new object has valid data, false == object is invalid</returns>
+        /// <returns>true == object has valid data, false == object is invalid</returns>
         public bool IsValid()
         {
-            return !string.IsNullOrEmpty(this.Name) && !Double.IsNaN(StandardRate);
+            return !string.IsNullOrEmpty(this.Name) && !double.IsNaN(this.StandardRate);
         }
 
         /// <summary>
@@ -56,7 +44,7 @@ namespace Project_01
         /// </summary>
         public void Print()
         {
-            if (this.StandardRate == Double.MinValue)
+            if (this.StandardRate == double.MinValue)
             {
                 Console.WriteLine($"{this.Name,-15}: N/A");
             }
@@ -69,7 +57,7 @@ namespace Project_01
         /// <summary>
         /// Tries to import a new country data if possible
         /// </summary>
-        /// <param name="countryCode">countryCode (ie. "UK")</param>
+        /// <param name="countryCode">countryCode (eg.. "UK")</param>
         /// <param name="jsonString">json data of this country</param>
         private void TryImport(string countryCode, string jsonString)
         {
@@ -77,16 +65,29 @@ namespace Project_01
             {
                 JsonTemplate countryData = JsonConvert.DeserializeObject<JsonTemplate>(jsonString);
                 this.Name = countryData.Country;
+
                 // some countries do not have some rates applicable (there is a "false" string instead of a decimal value) 
                 // in this case the value will be recognised as a "minimal" (but nonzero) rather than wrong one
-                this.StandardRate = countryData.StandardRate.ToLower() == "false" ? Double.MinValue : Convert.ToDouble(countryData.StandardRate, CultureInfo.InvariantCulture);
+                this.StandardRate = countryData.StandardRate.ToLower() == "false" ? double.MinValue : Convert.ToDouble(countryData.StandardRate, CultureInfo.InvariantCulture);
             }
             catch (Exception ex)
             {
                 this.Name = null;
-                this.StandardRate = Double.NaN;
+                this.StandardRate = double.NaN;
                 Console.WriteLine($"Country {countryCode} was not imported. ({ex.Message})");
             }
+        }
+
+        /// <summary>
+        /// Struct template for Json deserializer
+        /// </summary>
+        private struct JsonTemplate
+        {
+            [JsonProperty("country")]
+            public string Country { get; set; }
+
+            [JsonProperty("standard_rate")]
+            public string StandardRate { get; set; }
         }
     }
 }
